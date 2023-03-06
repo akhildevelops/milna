@@ -1,2 +1,3 @@
-# can-i-have
-Share your media profiles
+# Milna
+
+A single platfrom to share your social media handles.
