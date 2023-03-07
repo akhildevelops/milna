@@ -11,7 +11,8 @@
                 "mhutchie.git-graph",
                 "eamodio.gitlens",
                 "mtxr.sqltools-driver-pg",
-                "mtxr.sqltools"
+                "mtxr.sqltools",
+                "yzhang.markdown-all-in-one"
             ]
         }
     },
