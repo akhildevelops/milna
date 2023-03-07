@@ -1,0 +1,117 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'milna'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=milna"
+                ],
+                "filter": {
+                    "name": "milna",
+                    "kind": "lib"
+                },
+                "env": {
+                    "DATABASE_URL": "postgres://postgres:postgres@db:5432/milna"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'milna'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=milna",
+                    "--package=milna"
+                ],
+                "filter": {
+                    "name": "milna",
+                    "kind": "bin"
+                },
+                "env": {
+                    "DATABASE_URL": "postgres://postgres:postgres@db:5432/milna"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'milna'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=milna",
+                    "--package=milna"
+                ],
+                "filter": {
+                    "name": "milna",
+                    "kind": "bin"
+                },
+                "env": {
+                    "DATABASE_URL": "postgres://postgres:postgres@db:5432/milna"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'database'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=database",
+                    "--package=milna"
+                ],
+                "filter": {
+                    "name": "database",
+                    "kind": "test"
+                },
+                "env": {
+                    "DATABASE_URL": "postgres://postgres:postgres@db:5432/milna"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'user'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=user",
+                    "--package=milna"
+                ],
+                "filter": {
+                    "name": "user",
+                    "kind": "test"
+                },
+                "env": {
+                    "DATABASE_URL": "postgres://postgres:postgres@db:5432/milna"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
