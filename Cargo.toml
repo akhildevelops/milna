@@ -14,3 +14,4 @@ sqlx = { version = "0.6.2", features = [
     "chrono",
 ] }
 chrono = { version = "0.4.23" }
+futures = { version = "0.3.26" }

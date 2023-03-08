@@ -2,9 +2,8 @@ use crate::database::models;
 use crate::user::User;
 use crate::userdata::{Contact, Facebook, Github, Instagram, UserData};
 use anyhow::Result;
-use sqlx::sqlx_macros;
-use sqlx::{self, postgres::PgPool};
-
+use futures::future;
+use sqlx::{self, postgres::PgPool, sqlx_macros};
 async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
     let row = sqlx::query_as!(
         models::user,
@@ -107,8 +106,7 @@ fn generate_insert_str(user_id: &i32, data_id: &i32, data_str: &str) -> String {
     )
 }
 
-async fn insert_user_data(user: &User, data: &UserData, pool: &PgPool) -> Result<i32> {
-    let user = get_user(user, pool).await?;
+async fn insert_user_data(user: &models::user, data: &UserData, pool: &PgPool) -> Result<i32> {
     let data_id_type = match data {
         UserData::Contact(x) => (insert_contact(x, pool).await?.id, "contact_id"),
         UserData::Facebook(x) => (insert_facebook(x, pool).await?.id, "facebook_id"),
@@ -119,6 +117,14 @@ async fn insert_user_data(user: &User, data: &UserData, pool: &PgPool) -> Result
     println!("{}", insert_str);
     let data: models::data = sqlx::query_as(&insert_str).fetch_one(pool).await?;
     Ok(data.id)
+}
+
+async fn insert_multiple_user_data(
+    user: &models::user,
+    data: &[UserData],
+    pool: &PgPool,
+) -> Vec<Result<i32>> {
+    future::join_all(data.iter().map(|x| insert_user_data(user, x, pool))).await
 }
 
 #[cfg(test)]
@@ -159,6 +165,26 @@ mod test {
             name: "Akhil".to_string(),
         };
         let userdata = UserData::Facebook(fb);
+        let user = get_user(&user, &pool).await.unwrap();
         insert_user_data(&user, &userdata, &pool).await.unwrap();
+    }
+
+    #[sqlx_macros::test]
+    fn data_insert_multiple() {
+        let pool = sqlx::postgres::PgPool::connect("postgres://postgres:postgres@db:5432/milna")
+            .await
+            .unwrap();
+        let fb = Facebook {
+            link: "https://facebook.com/akhil2ndprofile".to_string(),
+        };
+        let gb = Github {
+            link: "https://github.com/akhil2ndprofile".to_string(),
+        };
+        let user = User {
+            name: "Akhil".to_string(),
+        };
+        let userdata = [UserData::Facebook(fb), UserData::Github(gb)];
+        let user = get_user(&user, &pool).await.unwrap();
+        insert_multiple_user_data(&user, &userdata, &pool).await;
     }
 }
