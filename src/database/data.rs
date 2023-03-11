@@ -106,25 +106,42 @@ fn generate_insert_str(user_id: &i32, data_id: &i32, data_str: &str) -> String {
     )
 }
 
-async fn insert_user_data(user: &models::user, data: &UserData, pool: &PgPool) -> Result<i32> {
-    let data_id_type = match data {
-        UserData::Contact(x) => (insert_contact(x, pool).await?.id, "contact_id"),
-        UserData::Facebook(x) => (insert_facebook(x, pool).await?.id, "facebook_id"),
-        UserData::Github(x) => (insert_github(x, pool).await?.id, "github_id"),
-        UserData::Instagram(x) => (insert_instagram(x, pool).await?.id, "instagram_id"),
+async fn insert_data(data: &UserData, pool: &PgPool) -> Result<i32> {
+    let id = match data {
+        UserData::Contact(x) => insert_contact(x, pool).await?.id,
+        UserData::Facebook(x) => insert_facebook(x, pool).await?.id,
+        UserData::Github(x) => insert_github(x, pool).await?.id,
+        UserData::Instagram(x) => insert_instagram(x, pool).await?.id,
     };
-    let insert_str = generate_insert_str(&user.id, &data_id_type.0, &data_id_type.1);
-    println!("{}", insert_str);
-    let data: models::data = sqlx::query_as(&insert_str).fetch_one(pool).await?;
-    Ok(data.id)
+    // let insert_str = generate_insert_str(&user.id, &data_id_type.0, &data_id_type.1);
+    // println!("{}", insert_str);
+    // let data: models::data = sqlx::query_as(&insert_str).fetch_one(pool).await?;
+    Ok(id)
 }
 
 async fn insert_multiple_user_data(
     user: &models::user,
     data: &[UserData],
     pool: &PgPool,
-) -> Vec<Result<i32>> {
-    future::join_all(data.iter().map(|x| insert_user_data(user, x, pool))).await
+) -> Result<i32> {
+    // future::join_all(data.iter().map(|x| insert_user_data(user, x, pool))).await
+    let data_ids = future::join_all(data.iter().map(|x| insert_data(x, pool))).await;
+    // use sqlx::QueryBuilder;
+    // let mut qb = QueryBuilder::new("INSERT INTO data(user_id");
+    // let mut sep = qb.separated(",");
+    let mut insert_statement = "INSERT INTO data (user_id".to_string();
+    for ud in data {
+        insert_statement.push_str(&format!(",{}", ud.to_string()));
+    }
+    insert_statement.push_str(&format!(") VALUES ({}", user.id));
+    for id in data_ids {
+        insert_statement.push_str(&format!(",{}", id?));
+    }
+    insert_statement.push_str(") RETURNING * ;");
+    Ok(sqlx::query_as::<_, models::data>(&insert_statement)
+        .fetch_one(pool)
+        .await?
+        .id)
 }
 
 #[cfg(test)]
@@ -166,7 +183,9 @@ mod test {
         };
         let userdata = UserData::Facebook(fb);
         let user = get_user(&user, &pool).await.unwrap();
-        insert_user_data(&user, &userdata, &pool).await.unwrap();
+        insert_multiple_user_data(&user, &[userdata], &pool)
+            .await
+            .unwrap();
     }
 
     #[sqlx_macros::test]
@@ -185,6 +204,8 @@ mod test {
         };
         let userdata = [UserData::Facebook(fb), UserData::Github(gb)];
         let user = get_user(&user, &pool).await.unwrap();
-        insert_multiple_user_data(&user, &userdata, &pool).await;
+        insert_multiple_user_data(&user, &userdata, &pool)
+            .await
+            .unwrap();
     }
 }
