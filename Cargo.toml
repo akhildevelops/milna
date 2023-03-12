@@ -19,3 +19,5 @@ futures = { version = "0.3.26" }
 tokio = { version = "1.26.0", features = ["macros"] }
 serde_json = { version = "1.0.94" }
 serde = { version = "1.0.155", features = ["derive"] }
+env_logger = { version = "0.10.0" }
+[dev-dependencies]

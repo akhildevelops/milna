@@ -4,7 +4,7 @@ use crate::userdata::{Contact, Facebook, Github, Instagram, UserData};
 use anyhow::Result;
 use futures::future;
 use sqlx::{self, postgres::PgPool, sqlx_macros};
-async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
+pub(crate) async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
     let row = sqlx::query_as!(
         models::user,
         r#"
@@ -18,7 +18,7 @@ async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
     .await?;
     Ok(row)
 }
-async fn get_user(user: &User, pool: &PgPool) -> Result<models::user> {
+pub(crate) async fn get_user(user: &User, pool: &PgPool) -> Result<models::user> {
     Ok(sqlx::query_as!(
         models::user,
         r#"

@@ -1,11 +1,17 @@
 // use chrono::
 use chrono::NaiveDateTime;
+use serde::Serialize;
+use serde::{self, Serializer};
 use sqlx::FromRow;
 
-#[derive(FromRow)]
+fn nativedate_ser<T: Serializer>(ts: &NaiveDateTime, s: T) -> Result<T::Ok, T::Error> {
+    s.serialize_str(&ts.format("%Y-%m-%d %H:%M:%S").to_string())
+}
+#[derive(FromRow, Serialize)]
 #[allow(non_camel_case_types)]
 pub(crate) struct user {
     pub id: i32,
+    #[serde(serialize_with = "nativedate_ser")]
     pub created_at: NaiveDateTime,
     pub name: String,
 }
