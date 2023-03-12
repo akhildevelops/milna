@@ -2,6 +2,7 @@
 name = "milna"
 version = "0.1.0"
 edition = "2021"
+description = "Contact sharing platform"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,3 +16,6 @@ sqlx = { version = "0.6.2", features = [
 ] }
 chrono = { version = "0.4.23" }
 futures = { version = "0.3.26" }
+tokio = { version = "1.26.0", features = ["macros"] }
+serde_json = { version = "1.0.94" }
+serde = { version = "1.0.155", features = ["derive"] }
