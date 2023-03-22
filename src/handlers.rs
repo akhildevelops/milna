@@ -4,10 +4,15 @@ use actix_web::{get, post, web, HttpResponse};
 use serde::Serialize;
 use sqlx::postgres::PgPool;
 use std::error::Error;
-#[derive(Serialize)]
-struct IndexResponse {
+
+// TODO: In example attrs, replace them with env!()
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct IndexResponse {
+    #[schema(example = "0.1.0")]
     version: &'static str,
+    #[schema(example = "milna")]
     name: &'static str,
+    #[schema(example = "Connects socially")]
     description: &'static str,
 }
 const INDEX_URL_RESPONSE: IndexResponse = IndexResponse {
@@ -15,18 +20,27 @@ const INDEX_URL_RESPONSE: IndexResponse = IndexResponse {
     name: env!("CARGO_PKG_NAME"),
     description: env!("CARGO_PKG_DESCRIPTION"),
 };
+
+#[utoipa::path(get,path="/",
+    responses((status=200,description="Index URL",body=[IndexResponse]))
+)]
 #[get("/")]
 async fn index_url() -> HttpResponse {
     HttpResponse::Ok().json(INDEX_URL_RESPONSE)
 }
 
-mod api {
+pub mod api {
     use super::*;
 
     #[get("")]
     async fn api_index_url() -> HttpResponse {
         HttpResponse::Ok().json(INDEX_URL_RESPONSE)
     }
+    #[utoipa::path(get,
+        path="/api/user/{name}",
+        params(("name",description="Name of the User")),
+        responses((status=200,description="Returns User details",body=[User]))
+    )]
     #[get("{name}")]
     async fn user_id(
         x: web::Path<user::User>,
@@ -35,6 +49,7 @@ mod api {
         let user = data::get_user(&x, &pgpool).await?;
         Ok(HttpResponse::Ok().json(user))
     }
+    #[utoipa::path(post, path = "/api/user",request_body=User)]
     #[post("")] // TODO: Correct this "" looks akward
     async fn push_user(
         x: web::Json<user::User>,

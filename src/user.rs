@@ -1,6 +1,7 @@
 use serde::Deserialize;
-#[derive(Deserialize)]
-pub(crate) struct User {
+use utoipa::ToSchema;
+#[derive(Deserialize, ToSchema)]
+pub struct User {
     pub name: String,
 }
 impl From<String> for User {
