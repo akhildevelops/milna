@@ -6,12 +6,19 @@ pub(crate) use contact::Contact;
 pub(crate) use facebook::Facebook;
 pub(crate) use github::Github;
 pub(crate) use instagram::Instagram;
+use serde::Deserialize;
 use std::fmt;
+use utoipa::ToSchema;
 
-pub(crate) enum UserData {
+#[derive(Deserialize, ToSchema)]
+pub enum UserData {
+    #[schema(example = "Hi")]
     Contact(Contact),
+    #[schema(example = "Hi")]
     Facebook(Facebook),
+    #[schema(example = "Hi")]
     Github(Github),
+    #[schema(example = "Hi")]
     Instagram(Instagram),
 }
 

@@ -8,8 +8,13 @@ use utoipa::OpenApi;
 const ENV_DATABASE_URL: &'static str = "DATABASE_URL";
 #[derive(utoipa::OpenApi)]
 #[openapi(
-    paths(handlers::index_url, handlers::api::user_id, handlers::api::push_user),
-    components(schemas(handlers::IndexResponse, milna::user::User))
+    paths(
+        handlers::index_url,
+        handlers::api::user_id,
+        handlers::api::push_user,
+        handlers::api::push_info
+    ),
+    components(schemas(handlers::IndexResponse, milna::user::User, milna::userdata::UserData))
 )]
 struct APIDOC;
 

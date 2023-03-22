@@ -119,7 +119,7 @@ async fn insert_data(data: &UserData, pool: &PgPool) -> Result<i32> {
     Ok(id)
 }
 
-async fn insert_multiple_user_data(
+pub(crate) async fn insert_multiple_user_data(
     user: &models::user,
     data: &[UserData],
     pool: &PgPool,

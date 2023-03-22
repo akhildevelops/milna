@@ -1,3 +1,5 @@
-pub(crate) struct Facebook {
+use serde::Deserialize;
+#[derive(Deserialize)]
+pub struct Facebook {
     pub link: String,
 }
