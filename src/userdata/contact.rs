@@ -3,6 +3,6 @@ use utoipa::ToSchema;
 
 #[derive(Deserialize, ToSchema)]
 pub struct Contact {
-    pub mobile_number: u64,
-    pub address: String,
+    pub mobile_number: Option<String>,
+    pub address: Option<String>,
 }
