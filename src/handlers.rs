@@ -1,10 +1,8 @@
 use crate::database::data;
-use crate::database::data::get_info;
 use crate::user;
 use crate::userdata;
 use actix_web::{get, post, web, HttpResponse};
 use serde::Serialize;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 use std::error::Error;
 
