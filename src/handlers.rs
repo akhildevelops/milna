@@ -1,4 +1,5 @@
 use crate::database::data;
+use crate::database::data::get_info;
 use crate::user;
 use crate::userdata;
 use actix_web::{get, post, web, HttpResponse};
@@ -72,6 +73,16 @@ pub mod api {
         let _ = data::insert_multiple_user_data(&user, &data, &pool).await?;
         Ok(HttpResponse::Ok().body("Inserted multiple"))
     }
+    #[utoipa::path(get,path="/api/userinfo/{name}",responses((status=200,description="went good",body=[Vec<UserData>])),params(("name",description="Name of the User")))]
+    #[get("{name}")]
+    async fn get_info(
+        name: web::Path<user::User>,
+        pool: web::Data<PgPool>,
+    ) -> Result<HttpResponse, Box<dyn Error>> {
+        let user = data::get_user(&name, &pool).await?;
+        let data = data::get_info(&user, &pool).await?;
+        Ok(HttpResponse::Ok().json(data))
+    }
 }
 
 pub fn api_config(x: &mut web::ServiceConfig) {
@@ -83,6 +94,10 @@ pub fn api_config(x: &mut web::ServiceConfig) {
                     .service(api::user_id)
                     .service(api::push_user),
             )
-            .service(web::scope("userinfo").service(api::push_info)),
+            .service(
+                web::scope("userinfo")
+                    .service(api::push_info)
+                    .service(api::get_info),
+            ),
     );
 }

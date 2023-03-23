@@ -7,10 +7,10 @@ pub(crate) use contact::Contact;
 pub(crate) use facebook::Facebook;
 pub(crate) use github::Github;
 pub(crate) use instagram::Instagram;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use utoipa::ToSchema;
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Serialize, ToSchema)]
 pub enum UserData {
     #[schema(example = "Hi")]
     Contact(Contact),
