@@ -3,6 +3,7 @@ use crate::user::User;
 use crate::userdata::{Contact, Facebook, Github, Instagram, UserData};
 use anyhow::Result;
 use futures::future;
+use sqlx::postgres::PgRow;
 use sqlx::{self, postgres::PgPool, sqlx_macros};
 pub(crate) async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
     let row = sqlx::query_as!(
@@ -53,7 +54,7 @@ async fn insert_contact(contact: &Contact, pool: &PgPool) -> Result<models::cont
             VALUES ($1,$2)
             RETURNING id, created_at, mobile_number, address
         "#,
-        contact.mobile_number as i32,
+        contact.mobile_number,
         contact.address
     )
     .fetch_one(pool)
@@ -89,6 +90,43 @@ async fn insert_github(github: &Github, pool: &PgPool) -> Result<models::github>
     Ok(row)
 }
 
+async fn get_github(x: &i32, pool: &PgPool) -> Result<models::github> {
+    let query = format!(
+        "SELECT * FROM github WHERE id={} ORDER BY created_at DESC;",
+        x
+    );
+    Ok(sqlx::query_as::<_, models::github>(&query)
+        .fetch_one(pool)
+        .await?)
+}
+
+async fn get_contact(x: &i32, pool: &PgPool) -> Result<models::contact> {
+    let query = format!(
+        "SELECT * FROM contact WHERE id={} ORDER BY created_at DESC;",
+        x
+    );
+    Ok(sqlx::query_as::<_, models::contact>(&query)
+        .fetch_one(pool)
+        .await?)
+}
+async fn get_instagram(x: &i32, pool: &PgPool) -> Result<models::instagram> {
+    let query = format!(
+        "SELECT * FROM instagram WHERE id={} ORDER BY created_at DESC;",
+        x
+    );
+    Ok(sqlx::query_as::<_, models::instagram>(&query)
+        .fetch_one(pool)
+        .await?)
+}
+async fn get_facebook(x: &i32, pool: &PgPool) -> Result<models::facebook> {
+    let query = format!(
+        "SELECT * FROM facebook WHERE id={} ORDER BY created_at DESC;",
+        x
+    );
+    Ok(sqlx::query_as::<_, models::facebook>(&query)
+        .fetch_one(pool)
+        .await?)
+}
 // async fn insert_github(github: &Github, pool: &PgPool) -> Result<models::github> {
 //     let insert_query =
 //         format!("INSERT INTO github (link) VALUES ($1) RETURNING id, created_at, link");
@@ -119,7 +157,7 @@ async fn insert_data(data: &UserData, pool: &PgPool) -> Result<i32> {
     Ok(id)
 }
 
-async fn insert_multiple_user_data(
+pub(crate) async fn insert_multiple_user_data(
     user: &models::user,
     data: &[UserData],
     pool: &PgPool,
@@ -142,6 +180,34 @@ async fn insert_multiple_user_data(
         .fetch_one(pool)
         .await?
         .id)
+}
+
+pub(crate) async fn get_info(user: &models::user, pool: &PgPool) -> Result<Vec<UserData>> {
+    let mut userdata = vec![];
+    let links_ids_query = format!(
+        "SELECT * from data where user_id={} ORDER BY created_at DESC;",
+        user.id
+    );
+    let result = sqlx::query_as::<_, models::data>(&links_ids_query)
+        .fetch_one(pool)
+        .await?;
+    if let Some(x) = result.contact_id {
+        let res = get_contact(&x, pool).await?;
+        userdata.push(UserData::Contact(res.into()));
+    };
+    if let Some(x) = result.facebook_id {
+        let res = get_facebook(&x, pool).await?;
+        userdata.push(UserData::Facebook(res.into()));
+    };
+    if let Some(x) = result.github_id {
+        let res = get_github(&x, pool).await?;
+        userdata.push(UserData::Github(res.into()));
+    };
+    if let Some(x) = result.instagram_id {
+        let res = get_instagram(&x, pool).await?;
+        userdata.push(UserData::Instagram(res.into()));
+    };
+    Ok(userdata)
 }
 
 #[cfg(test)]
@@ -207,5 +273,16 @@ mod test {
         insert_multiple_user_data(&user, &userdata, &pool)
             .await
             .unwrap();
+    }
+    #[sqlx_macros::test]
+    fn get_links() {
+        let pool = sqlx::postgres::PgPool::connect("postgres://postgres:postgres@db:5432/milna")
+            .await
+            .unwrap();
+        let user = User {
+            name: "Akhil".to_string(),
+        };
+        let user = get_user(&user, &pool).await.unwrap();
+        get_info(&user, &pool).await.unwrap(); // TODO: No assert to validate
     }
 }

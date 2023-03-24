@@ -21,7 +21,7 @@ pub(crate) struct user {
 pub(crate) struct contact {
     pub id: i32,
     pub created_at: NaiveDateTime,
-    pub mobile_number: Option<i32>,
+    pub mobile_number: Option<String>,
     pub address: Option<String>,
 }
 

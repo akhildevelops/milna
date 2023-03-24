@@ -7,3 +7,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    && apt-get autoremove -y && apt-get clean -y
 USER vscode
 RUN cargo install sqlx-cli@0.6.2
+RUN cargo install cargo-watch
