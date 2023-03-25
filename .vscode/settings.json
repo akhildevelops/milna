@@ -9,6 +9,16 @@
             "database": "milna",
             "username": "postgres",
             "password": "postgres"
+        },
+        {
+            "previewLimit": 50,
+            "server": "db.shuttle.rs",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "shuttle-postgres",
+            "database": "db-milna",
+            "username": "user-milna",
+            "password": "jr7HcDkPkozD"
         }
     ],
     "rust-analyzer.server.extraEnv": {

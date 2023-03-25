@@ -6,85 +6,52 @@ use futures::future;
 use sqlx::postgres::PgRow;
 use sqlx::{self, postgres::PgPool, sqlx_macros};
 pub(crate) async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
-    let row = sqlx::query_as!(
-        models::user,
-        r#"
-        INSERT INTO users (name)
-        VALUES ($1)
-        RETURNING id, created_at, name
-        "#,
+    let row = sqlx::query_as::<_, models::user>(&format!(
+        "INSERT INTO users (name) VALUES ({}) RETURNING id, created_at, name",
         user.name
-    )
+    ))
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 pub(crate) async fn get_user(user: &User, pool: &PgPool) -> Result<models::user> {
-    Ok(sqlx::query_as!(
-        models::user,
-        r#"
-        SELECT * FROM users WHERE name=$1
-        "#,
-        user.name
+    Ok(
+        sqlx::query_as::<_, models::user>(&format!("SELECT * FROM users WHERE name={}", user.name))
+            .fetch_one(pool)
+            .await?,
     )
-    .fetch_one(pool)
-    .await?)
 }
 
 async fn insert_instagram(instagram: &Instagram, pool: &PgPool) -> Result<models::instagram> {
-    let row = sqlx::query_as!(
-        models::instagram,
-        r#"
-            INSERT INTO instagram (link)
-            VALUES ($1)
-            RETURNING id, created_at, link
-            "#,
+    let row = sqlx::query_as::<_, models::instagram>(&format!(
+        "INSERT INTO instagram (link) VALUES ({}) RETURNING id, created_at, link",
         instagram.link
-    )
+    ))
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 
 async fn insert_contact(contact: &Contact, pool: &PgPool) -> Result<models::contact> {
-    let row = sqlx::query_as!(
-        models::contact,
-        r#"
-            INSERT INTO contact (mobile_number,address)
-            VALUES ($1,$2)
-            RETURNING id, created_at, mobile_number, address
-        "#,
-        contact.mobile_number,
-        contact.address
-    )
+    let row = sqlx::query_as::<_,models::contact>(&format!("INSERT INTO contact (mobile_number,address) VALUES ({:?},{:?}) RETURNING id, created_at, mobile_number, address",contact.mobile_number,contact.address))
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 async fn insert_facebook(facebook: &Facebook, pool: &PgPool) -> Result<models::facebook> {
-    let row = sqlx::query_as!(
-        models::facebook,
-        r#"
-            INSERT INTO facebook (link)
-            VALUES ($1)
-            RETURNING id, created_at, link
-            "#,
+    let row = sqlx::query_as::<_, models::facebook>(&format!(
+        "INSERT INTO facebook (link) VALUES ({}) RETURNING id, created_at, link",
         facebook.link
-    )
+    ))
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 async fn insert_github(github: &Github, pool: &PgPool) -> Result<models::github> {
-    let row = sqlx::query_as!(
-        models::github,
-        r#"
-            INSERT INTO github (link)
-            VALUES ($1)
-            RETURNING id, created_at, link
-            "#,
+    let row = sqlx::query_as::<_, models::github>(&format!(
+        "INSERT INTO github (link) VALUES ({}) RETURNING id, created_at, link",
         github.link
-    )
+    ))
     .fetch_one(pool)
     .await?;
     Ok(row)

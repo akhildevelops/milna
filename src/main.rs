@@ -1,6 +1,12 @@
-use actix_web::{web, App, HttpServer};
+use actix_web::{
+    web::{self, ServiceConfig},
+    App, HttpServer,
+};
 use env_logger;
 use milna::handlers;
+use shuttle_actix_web::ShuttleActixWeb;
+use shuttle_runtime::CustomError;
+use shuttle_shared_db::Postgres;
 use sqlx::postgres::PgPool;
 use std::{env, error::Error};
 use utoipa::OpenApi;
@@ -19,23 +25,43 @@ const ENV_DATABASE_URL: &'static str = "DATABASE_URL";
 )]
 struct APIDOC;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+// #[tokio::main]
+// async fn main() -> Result<(), Box<dyn Error>> {
+//     let openapi = APIDOC::openapi();
+//     let openapi_service = utoipa_swagger_ui::SwaggerUi::new("/swagger-ui/{_:.*}")
+//         .url("/api-doc/openapi.json", openapi);
+//     std::env::set_var("RUST_LOG", "debug");
+//     env_logger::init();
+//     let db_url = env::var(ENV_DATABASE_URL)?;
+//     let pool = PgPool::connect(&db_url).await?;
+//     Ok(HttpServer::new(move || {
+//         App::new()
+//             .service(handlers::index_url)
+//             .service(openapi_service.clone())
+//             .app_data(web::Data::new(pool.clone()))
+//             .configure(handlers::api_config)
+//     })
+//     .bind(("localhost", 8080))?
+//     .run()
+//     .await?)
+// }
+
+#[shuttle_runtime::main]
+async fn actix_web(
+    #[shuttle_shared_db::Postgres] pool: PgPool,
+) -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Clone> {
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .map_err(CustomError::new)?;
     let openapi = APIDOC::openapi();
     let openapi_service = utoipa_swagger_ui::SwaggerUi::new("/swagger-ui/{_:.*}")
         .url("/api-doc/openapi.json", openapi);
-    std::env::set_var("RUST_LOG", "debug");
-    env_logger::init();
-    let db_url = env::var(ENV_DATABASE_URL)?;
-    let pool = PgPool::connect(&db_url).await?;
-    Ok(HttpServer::new(move || {
-        App::new()
-            .service(handlers::index_url)
-            .service(openapi_service.clone())
-            .app_data(web::Data::new(pool.clone()))
+    let config = move |cfg: &mut ServiceConfig| {
+        cfg.service(handlers::index_url)
+            .app_data(web::Data::new(pool))
             .configure(handlers::api_config)
-    })
-    .bind(("localhost", 8080))?
-    .run()
-    .await?)
+            .service(openapi_service);
+    };
+    Ok(config.into())
 }

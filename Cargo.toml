@@ -22,3 +22,7 @@ serde = { version = "1.0.155", features = ["derive"] }
 env_logger = { version = "0.10.0" }
 utoipa = { version = "3.1.2" }
 utoipa-swagger-ui = { version = "3.1.1", features = ["actix-web"] }
+shuttle-actix-web = { version = "0.12.0" }
+shuttle-shared-db = { version = "0.12.0", features = ["postgres"] }
+shuttle-runtime = { version = "0.12.0" }
+shuttle-aws-rds = { version = "0.12.0", features = ["postgres"] }
