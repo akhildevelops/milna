@@ -3,8 +3,7 @@ use crate::user::User;
 use crate::userdata::{Contact, Facebook, Github, Instagram, UserData};
 use anyhow::Result;
 use futures::future;
-use sqlx::postgres::PgRow;
-use sqlx::{self, postgres::PgPool, sqlx_macros};
+use sqlx::{self, postgres::PgPool};
 pub(crate) async fn insert_user(user: &User, pool: &PgPool) -> Result<models::user> {
     let row = sqlx::query_as!(
         models::user,
@@ -137,13 +136,6 @@ async fn get_facebook(x: &i32, pool: &PgPool) -> Result<models::facebook> {
 //         .await?)
 // }
 
-fn generate_insert_str(user_id: &i32, data_id: &i32, data_str: &str) -> String {
-    format!(
-        "INSERT INTO data (user_id,{}) VALUES ({},{}) RETURNING id, created_at, instagram_id, github_id, facebook_id, contact_id, user_id",
-        data_str, user_id, data_id
-    )
-}
-
 async fn insert_data(data: &UserData, pool: &PgPool) -> Result<i32> {
     let id = match data {
         UserData::Contact(x) => insert_contact(x, pool).await?.id,
@@ -213,6 +205,7 @@ pub(crate) async fn get_info(user: &models::user, pool: &PgPool) -> Result<Vec<U
 #[cfg(test)]
 mod test {
     use super::*;
+    use sqlx::sqlx_macros;
 
     #[sqlx_macros::test]
     fn user_insert() {

@@ -1,17 +1,11 @@
-use actix_web::{
-    web::{self, ServiceConfig},
-    App, HttpServer,
-};
+use actix_web::web::{self, ServiceConfig};
 use env_logger;
 use milna::handlers;
 use shuttle_actix_web::ShuttleActixWeb;
 use shuttle_runtime::CustomError;
-use shuttle_shared_db::Postgres;
 use sqlx::postgres::PgPool;
-use std::{env, error::Error};
 use utoipa::OpenApi;
 
-const ENV_DATABASE_URL: &'static str = "DATABASE_URL";
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
@@ -50,6 +44,7 @@ struct APIDOC;
 async fn actix_web(
     #[shuttle_shared_db::Postgres] pool: PgPool,
 ) -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Clone> {
+    env_logger::init();
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
