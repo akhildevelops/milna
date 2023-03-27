@@ -1,0 +1,202 @@
+{
+  "db": "PostgreSQL",
+  "6cea5365bdeb2a3d80d12ccfc4809a01241c1a80dc39415f657f2b35f2ba788f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "link",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO github (link)\n            VALUES ($1)\n            RETURNING id, created_at, link\n            "
+  },
+  "7cd953567c244fdedcc0ad467cf89787a17eab86cc37568aab30e384a5635345": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "link",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO facebook (link)\n            VALUES ($1)\n            RETURNING id, created_at, link\n            "
+  },
+  "b4d5f832d36628a3339b3fee05f2e7d365bd39791c727c47347b1808c96c02f3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO users (name)\n        VALUES ($1)\n        RETURNING id, created_at, name\n        "
+  },
+  "bba13c2dd75798dd2975b3983d02441870237bad62629fc38e181177997b4cde": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "mobile_number",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "address",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO contact (mobile_number,address)\n            VALUES ($1,$2)\n            RETURNING id, created_at, mobile_number, address\n        "
+  },
+  "edeacaa7cb9959a40f29eb302d3571069c5a9b9059d1fcae5ea2e56675f47ad2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM users WHERE name=$1\n        "
+  },
+  "efed440381296931a4aa5fe0779c14a879f1f4b6b921a7339fe6e69b887f70e3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "link",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO instagram (link)\n            VALUES ($1)\n            RETURNING id, created_at, link\n            "
+  }
+}
