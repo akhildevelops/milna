@@ -42,7 +42,8 @@ struct APIDOC;
 
 #[shuttle_runtime::main]
 async fn actix_web(
-    #[shuttle_shared_db::Postgres] pool: PgPool,
+    #[shuttle_shared_db::Postgres(local_uri = "postgres://postgres:postgres@db:5432/milna")]
+    pool: PgPool,
 ) -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Clone> {
     env_logger::init();
     sqlx::migrate!("./migrations")
