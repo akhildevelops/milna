@@ -3,17 +3,19 @@
     import { links_loader } from "./lib/load";
     import type { Facebook, Github, Contact } from "./lib/data";
     import Name from "./lib/name.svelte";
-    let data: Promise<Array<Facebook | Github | Contact>> = links_loader();
+    let data: Promise<{
+        name: string;
+        links: Array<Facebook | Github | Contact>;
+    }> = links_loader();
 </script>
 
 <div>
-    <Name name="Akhil" />
     {#await data}
         ...waiting
-    {:then links}
-        <!-- {console.log(links)} -->
+    {:then data_res}
+        <Name name={data_res.name} />
         <div class="links">
-            <Links data_links={{ links: links }} />
+            <Links data_links={{ links: data_res.links }} />
         </div>
     {/await}
 </div>
