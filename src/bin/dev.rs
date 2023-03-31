@@ -1,10 +1,11 @@
+use actix_cors::Cors;
+use actix_files::Files;
 use actix_web::{web, App, HttpServer};
 use env_logger;
 use milna::handlers;
 use sqlx::postgres::PgPool;
 use std::{env, error::Error};
 use utoipa::OpenApi;
-
 const ENV_DATABASE_URL: &'static str = "DATABASE_URL";
 #[derive(utoipa::OpenApi)]
 #[openapi(
@@ -29,11 +30,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let db_url = env::var(ENV_DATABASE_URL)?;
     let pool = PgPool::connect(&db_url).await?;
     Ok(HttpServer::new(move || {
+        let cors = Cors::default().allow_any_origin();
         App::new()
-            .service(handlers::index_url)
+            .wrap(cors)
             .service(openapi_service.clone())
-            .app_data(web::Data::new(pool.clone()))
             .configure(handlers::api_config)
+            .service(
+                Files::new("/", "svelte/build")
+                    .index_file("index.html")
+                    .default_handler(
+                        actix_files::NamedFile::open(format!("{}/index.html", "svelte/build"))
+                            .unwrap(),
+                    ),
+            )
+            .app_data(web::Data::new(pool.clone()))
     })
     .bind(("localhost", 8080))?
     .run()
