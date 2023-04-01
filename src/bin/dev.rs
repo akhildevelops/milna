@@ -35,6 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .wrap(cors)
             .service(openapi_service.clone())
             .configure(handlers::api_config)
+            .configure(handlers::qr_config)
             .service(
                 Files::new("/", "svelte/build")
                     .index_file("index.html")

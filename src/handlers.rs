@@ -2,10 +2,10 @@ use crate::database::data;
 use crate::user;
 use crate::userdata;
 use actix_web::{get, post, web, HttpResponse};
+use fast_qr::{convert::image::ImageBuilder, qr::QRBuilder};
 use serde::Serialize;
 use sqlx::postgres::PgPool;
 use std::error::Error;
-
 // TODO: In example attrs, replace them with env!()
 #[derive(Serialize, utoipa::ToSchema)]
 pub struct IndexResponse {
@@ -98,4 +98,28 @@ pub fn api_config(x: &mut web::ServiceConfig) {
                     .service(api::get_info),
             ),
     );
+}
+
+mod qr {
+    use super::*;
+    use actix_web::http::header;
+    #[get("{name}")]
+    async fn get_qr(name: web::Path<user::User>) -> Result<HttpResponse, Box<dyn Error>> {
+        let userinfo_url = format!("http://localhost:8080/userinfo/{}", name.name);
+        let qr = QRBuilder::new(userinfo_url)
+            .build()
+            .map_err(|err| format!("{:?}", err))?;
+        let image = ImageBuilder::default()
+            .fit_height(200)
+            .fit_width(200)
+            .to_pixmap(&qr);
+        let image = image.encode_png()?;
+        Ok(HttpResponse::Ok()
+            .content_type(header::ContentType::png())
+            .body(image))
+    }
+}
+
+pub fn qr_config(x: &mut web::ServiceConfig) {
+    x.service(web::scope("qr").service(qr::get_qr));
 }
