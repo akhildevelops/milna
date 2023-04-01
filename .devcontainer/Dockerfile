@@ -5,6 +5,17 @@ FROM mcr.microsoft.com/devcontainers/rust:0-1-bullseye
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    && apt-get -y install clang lld \
    && apt-get autoremove -y && apt-get clean -y
+
+
+RUN ARCH="linux-x86_64" && \
+   VERSION="22.2" && \
+   curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-$ARCH.zip" && \
+   unzip -o "protoc-$VERSION-$ARCH.zip" bin/protoc "include/*" -d /usr/local && \
+   rm -f "protoc-$VERSION-$ARCH.zip"
+
 USER vscode
+
 RUN cargo install sqlx-cli@0.6.2
 RUN cargo install cargo-watch
+
+RUN cargo install cargo-shuttle
